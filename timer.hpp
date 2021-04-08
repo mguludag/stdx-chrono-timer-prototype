@@ -31,9 +31,6 @@ namespace stdx {
           timer(const timer &copy)
               : m_interval(copy.m_interval), m_func(copy.m_func), m_inflight(false) {}
 
-          timer(const timer &&move) noexcept
-              : m_interval(move.m_interval), m_func(move.m_func), m_inflight(false) {}
-
           explicit timer(const std::chrono::milliseconds interval,
                          const std::function<void()> &func)
               : m_interval(interval), m_func(func), m_inflight(true) {
