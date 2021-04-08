@@ -31,41 +31,21 @@ namespace stdx {
           timer(const timer &copy)
               : m_interval(copy.m_interval), m_func(copy.m_func), m_inflight(false) {}
 
-          explicit timer(const std::chrono::milliseconds interval,
-                         const std::function<void()> &func)
-              : m_interval(interval), m_func(func), m_inflight(true) {
-            event_loop();
-          }
-
-          explicit timer(const std::chrono::microseconds interval,
+          template<typename interval_type = std::chrono::milliseconds>
+          explicit timer(const interval_type interval,
                          const std::function<void()> &func)
               : m_interval(
-                    std::chrono::duration_cast<std::chrono::milliseconds>(interval)),
-                m_func(func), m_inflight(true) {
-            event_loop();
-          }
-
-          explicit timer(const std::chrono::nanoseconds interval,
-                         const std::function<void()> &func)
-              : m_interval(
-                    std::chrono::duration_cast<std::chrono::milliseconds>(interval)),
-                m_func(func), m_inflight(true) {
-            event_loop();
-          }
-
-          explicit timer(const std::chrono::seconds interval,
-                         const std::function<void()> &func)
-              : m_interval(
-                    std::chrono::duration_cast<std::chrono::milliseconds>(interval)),
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(interval)),
                 m_func(func), m_inflight(true) {
             event_loop();
           }
 
           ~timer() { stop_event_loop(); }
 
-          void singleshot(const std::chrono::milliseconds interval,
+          template<typename interval_type = std::chrono::milliseconds>
+          void singleshot(const interval_type interval,
                          const std::function<void()> &func) {
-              m_interval = interval;
+              m_interval = std::chrono::duration_cast<std::chrono::nanoseconds>(interval);
               m_func = func;
               m_thread = std::thread([this]{
                   std::this_thread::sleep_for(m_interval);
@@ -73,51 +53,11 @@ namespace stdx {
               });
           }
 
-          void singleshot(const std::chrono::microseconds interval,
-                         const std::function<void()> &func) {
-              m_interval = std::chrono::duration_cast<std::chrono::milliseconds>(interval);
-              m_func = func;
-              m_thread = std::thread([this]{
-                  std::this_thread::sleep_for(m_interval);
-                  m_func();
-              });
+          template<typename interval_type = std::chrono::milliseconds>
+          void set_interval(const interval_type interval) {
+            m_interval = std::chrono::duration_cast<std::chrono::nanoseconds>(interval);
           }
 
-          void singleshot(const std::chrono::nanoseconds interval,
-                         const std::function<void()> &func) {
-              m_interval = std::chrono::duration_cast<std::chrono::milliseconds>(interval);
-              m_func = func;
-              m_thread = std::thread([this]{
-                  std::this_thread::sleep_for(m_interval);
-                  m_func();
-              });
-          }
-
-          void singleshot(const std::chrono::seconds interval,
-                         const std::function<void()> &func) {
-              m_interval = std::chrono::duration_cast<std::chrono::milliseconds>(interval);
-              m_func = func;
-              m_thread = std::thread([this]{
-                  std::this_thread::sleep_for(m_interval);
-                  m_func();
-              });
-          }
-
-          void set_interval(const std::chrono::milliseconds interval) {
-            m_interval = interval;
-          }
-          void set_interval(const std::chrono::microseconds interval) {
-            m_interval =
-                std::chrono::duration_cast<std::chrono::milliseconds>(interval);
-          }
-          void set_interval(const std::chrono::nanoseconds interval) {
-            m_interval =
-                std::chrono::duration_cast<std::chrono::milliseconds>(interval);
-          }
-          void set_interval(const std::chrono::seconds interval) {
-            m_interval =
-                std::chrono::duration_cast<std::chrono::milliseconds>(interval);
-          }
           void connect(const std::function<void()> &func) { m_func = func; }
           void start() {
             m_inflight = true;
@@ -142,7 +82,7 @@ namespace stdx {
             }
           }
 
-          std::chrono::milliseconds m_interval{};
+          std::chrono::nanoseconds m_interval{};
           std::function<void()> m_func;
           std::atomic<bool> m_inflight;
           std::thread m_thread;
