@@ -1,6 +1,6 @@
 # stdx-chrono-timer-prototype
 
-This is simple timer prototype for C++11 and later. 
+This is simple timer prototype for C++11 and later with no dependencies. 
 
 ## Usage
 
