@@ -4,7 +4,7 @@ This is simple timer prototype for C++11 and later with no dependencies.
 
 ## Usage
 
-```
+```cpp
 #include "timer.hpp"
 
 int main() {
